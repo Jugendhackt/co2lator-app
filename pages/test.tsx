@@ -6,6 +6,7 @@ import {
 	CO2DataPointType,
 	CO2DataPoint_Fortbewegung,
 } from '../backend/data';
+import addAnswerToStorage from '../backend/questions';
 import Header from '../components/header';
 import { GlobalStorageManager } from './_app';
 
@@ -38,6 +39,16 @@ const TestPage: NextPage = () => {
 			answertype: Question_AnswerType.boolean,
 			type: CO2DataPointType.fortbewegung,
 			calculate: async (value: boolean) => {
+				addAnswerToStorage(value, Question_AnswerType.boolean, setError).then(
+					() => {
+						setStoredData((e) => {
+							e.fortbewegung.auto_istEAuto = value;
+							return e;
+						});
+					}
+				);
+			},
+			/*calculate: async (value: boolean) => {
 				return new Promise<void>((resolve, reject) => {
 					setStoredData((e) => {
 						e.fortbewegung.auto_istEAuto = value;
@@ -49,8 +60,8 @@ const TestPage: NextPage = () => {
 				const point = storedData.points.find(
 					(e) => e.type === CO2DataPointType.fortbewegung
 				) as CO2DataPoint_Fortbewegung;
-				point.auto_istEAuto = value;*/
-			},
+				point.auto_istEAuto = value;
+			},*/
 		},
 		{
 			index: 1,
@@ -118,7 +129,9 @@ const TestPage: NextPage = () => {
 	];
 
 	useEffect(() => {
-		console.log('Run init');
+		if (localStorage.getItem('username') === null) {
+			router.push('/');
+		}
 		// init data
 		//storedData = new CO2Data();
 		/*const fortbewegungPoint = new CO2DataPoint_Fortbewegung();
@@ -191,7 +204,24 @@ const TestPage: NextPage = () => {
 					</div>
 				) : (
 					<div className="h-full text-center flex flex-col justify-between">
-						<div className="">
+						<div className="flex flex-col justify-center">
+							<div className=" w-80 h-2 relative self-center mb-4">
+								<div className="w-full h-full bg-gray-300 rounded absolute" />
+								<div
+									style={{
+										width: `${(selectedQuestion / questions.length) * 100}%`,
+									}}
+									className={`bg-gradient-to-r from-red-400 ${
+										selectedQuestion / questions.length > 0.75
+											? 'via-yellow-300 to-green-400'
+											: selectedQuestion / questions.length > 0.5
+											? 'to-yellow-300'
+											: selectedQuestion / questions.length > 0.25
+											? 'to-yellow-600'
+											: 'to-yellow-700'
+									} h-2 rounded absolute`}
+								></div>
+							</div>
 							<p>Emissionen: {emissionenSumme.toFixed(0)}kg/Jahr</p>
 							<p className="italic content-center">
 								Frage {selectedQuestion + 1} von {questions.length}:{' '}
@@ -308,3 +338,4 @@ interface Answer {
 }
 
 export default TestPage;
+export { Question_AnswerType };
