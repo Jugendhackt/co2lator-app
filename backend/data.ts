@@ -1,20 +1,62 @@
+/* 
+Haus pro Jahr
+Flug pro Stunde
+Handy pro Tag
+
+E-Auto:
+   	- Produktion: 8000kg
+   	- emissionen: 1120kg/Jahr
+Verbrenner:
+	- Produktion: 1900kg
+	- emissionen: 2100kg/Jahr
+// 1900kg -> 1 Jahr E-Auto (1t pro Jahr)
+// 2,76t pro Jahr -> 14000km Vernbrenner
+
+=> Pro Jahr
+*/
+
 import standard_data from './data.json';
 
-interface CO2Data {
-	points: CO2DataPoint[];
+class CO2Data {
+	fortbewegung: CO2DataPoint_Fortbewegung;
+	//points: CO2DataPoint[];
+
+	constructor(json: object) {
+		// @ts-ignore
+		this.fortbewegung =
+			// @ts-ignore
+			typeof json['fortbewegung'] === 'object'
+				? // @ts-ignore
+				  new CO2DataPoint_Fortbewegung(json['fortbewegung'])
+				: new CO2DataPoint_Fortbewegung({});
+		//this.points = [];
+	}
+
+	emissionen_berechnen(): number {
+		const emissionen_fortbewegung = this.fortbewegung.emissionen_berechnen();
+		const summe = emissionen_fortbewegung;
+		return summe;
+	}
+
+	// Datenpunkt hinzufügen
+	/*addPoint(point: CO2DataPoint) {
+		this.points.push(point);
+	}*/
 }
 
 class CO2DataPoint {
 	type: CO2DataPointType;
 
-	verbrauch: number;
-	verbrauch_berechnen: () => void;
+	emissionen: number;
+	emissionen_berechnen: () => number;
 
 	// Einrichtung eines Datenpunktes
 	constructor(type: CO2DataPointType) {
 		this.type = type;
-		this.verbrauch_berechnen = () => {};
-		this.verbrauch = 0;
+		this.emissionen_berechnen = () => {
+			return 0;
+		};
+		this.emissionen = 0;
 	}
 }
 
@@ -22,27 +64,27 @@ class CO2DataPoint_House extends CO2DataPoint {
 	person_count: number;
 	eco: boolean;
 
-	constructor(person_count: number, eco: boolean, standard_verbrauch: number) {
+	constructor(person_count: number, eco: boolean, standard_emissionen: number) {
 		super(CO2DataPointType.house);
 		this.person_count = person_count;
 		this.eco = eco;
 	}
 
-	// berechne den Verbrauch anhand der existierenden Daten * Personenanzahl
-	verbrauch_berechnen = () => {
-		// Standardwert für Verbrauch holen
-		const standard_verbrauch: number =
+	// berechne den emissionen anhand der existierenden Daten * Personenanzahl
+	emissionen_berechnen = () => {
+		// Standardwert für emissionen holen
+		const standard_emissionen: number =
 			standard_data['standard_daten']['haus']['value'];
 
-		// Insgesamten Verbrauch berechnen
-		this.verbrauch = standard_verbrauch * this.person_count;
+		// Insgesamten emissionen berechnen
+		this.emissionen = standard_emissionen * this.person_count;
 		// TODO: `eco` als Variable einbauen
 
-		return this.verbrauch;
+		return this.emissionen;
 	};
 }
 
-class CO2DataPoint_Flight extends CO2DataPoint {
+/*class CO2DataPoint_Flight extends CO2DataPoint {
 	flugstunden_count: number;
 
 	constructor(flugstunden: number) {
@@ -50,13 +92,14 @@ class CO2DataPoint_Flight extends CO2DataPoint {
 		this.flugstunden_count = flugstunden;
 	}
 
-	verbrauch_berechnen = () => {
-		const standard_verbrauch: number =
+	emissionen_berechnen = () => {
+		const standard_emissionen: number =
 			standard_data['standard_daten']['flug']['value'];
 
-		this.verbrauch = standard_verbrauch * this.flugstunden_count;
+		this.emissionen = standard_emissionen * this.flugstunden_count;
+		return 0;
 	};
-}
+}*/
 
 class CO2DataPoint_Phone extends CO2DataPoint {
 	stunden_am_tag: number;
@@ -66,24 +109,59 @@ class CO2DataPoint_Phone extends CO2DataPoint {
 		this.stunden_am_tag = stunden;
 	}
 
-	verbrauch_berechnen = () => {
-		const standard_verbrauch: number =
+	emissionen_berechnen = () => {
+		const standard_emissionen: number =
 			standard_data['standard_daten']['handy']['value'];
 
-		this.verbrauch = standard_verbrauch * this.stunden_am_tag;
+		this.emissionen = standard_emissionen * this.stunden_am_tag;
+		return 0;
 	};
 }
 
-class CO2DataPoint_Car extends CO2DataPoint {}
+class CO2DataPoint_Fortbewegung extends CO2DataPoint {
+	auto_istEAuto: boolean;
+	auto_KmProWoche: number;
+	flug_stdProJahr: number;
+	opnv_kmProWoche: number;
 
-enum CO2DataPointType {
-	flight,
-	bus,
-	car,
-	phone,
-	//heating,
-	house,
-	meat,
+	constructor(json: any) {
+		super(CO2DataPointType.fortbewegung);
+		this.auto_istEAuto = json['auto_istEAuto'] ?? false;
+		this.auto_KmProWoche = json['auto_KmProWoche'] ?? 0;
+		this.flug_stdProJahr = json['flug_stdProJahr'] ?? 0;
+		this.opnv_kmProWoche = json['opnv_kmProWoche'] ?? 0;
+	}
+	emissionen_berechnen = () => {
+		/* E-Auto emissionen: 80g/km;
+		Verbrenner emissionen: 150g/km;
+		*/
+		const _emissionen_auto_pro_km = this.auto_istEAuto ? 0.08 : 0.15;
+
+		// Berechnung emissionen vom Auto im Jahr mit angegebener Kilometeranzahl
+		const emissionen_auto_pro_jahr =
+			_emissionen_auto_pro_km * this.auto_KmProWoche * 52;
+
+		// 0.5kg/Person/Std. im Flugzeug
+		const emissionen_flug_pro_jahr = 0.5 * this.flug_stdProJahr;
+
+		// Berechnung emissionen von ÖPNV im Jahr mit angegebener Kilometeranzahl
+		const emissionen_opnv = 0.143 * this.opnv_kmProWoche * 52;
+
+		// Gebrauch speichern und zurückgeben
+		this.emissionen =
+			emissionen_auto_pro_jahr + emissionen_flug_pro_jahr + emissionen_opnv;
+		return this.emissionen;
+	};
 }
 
-export type { CO2Data };
+enum CO2DataPointType {
+	car = 'Automolitität',
+	phone = 'Handy',
+	//heating,
+	house = 'Wohnen',
+	meat = 'Fleisch',
+
+	fortbewegung = 'Fortbewegung',
+}
+
+export { CO2Data, CO2DataPointType, CO2DataPoint, CO2DataPoint_Fortbewegung };
