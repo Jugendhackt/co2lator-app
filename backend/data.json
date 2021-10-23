@@ -1,0 +1,16 @@
+{
+	"standard_daten": {
+		"haus": {
+			"value": 1000,
+			"einheit": "kWh"
+		},
+		"flug": {
+			"value": 0.5,
+			"einheit": "kg/Person/Std."
+		},
+		"handy": {
+			"value": 0.14,
+			"einheit": "kg"
+		}
+	}
+}
