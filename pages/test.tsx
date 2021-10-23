@@ -189,10 +189,12 @@ const TestPage: NextPage = () => {
 			<Header />
 			<div className="flex justify-center mt-6 h-full relative">
 				{quizEnded ? (
-					<div className="justify-center content-center flex flex-col text-center">
+					<div className="justify-center content-center flex flex-col text-center mx-2">
 						<img src="/icons/check-circle.svg" className="w-32 self-center" />
 						<h1 className="text-3xl font-bold mt-2">Fertig!</h1>
-						<p>Deine Emissionen liegen bei {emissionenSumme}kg im Jahr</p>
+						<p>
+							Deine Emissionen liegen bei {emissionenSumme.toFixed(1)}kg im Jahr
+						</p>
 						<button
 							className="rounded-lg px-4 p-2 bg-blue-500 text-white mt-4 w-auto"
 							onClick={() => {

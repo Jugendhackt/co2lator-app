@@ -28,7 +28,7 @@ const Home: NextPage = () => {
 			icon: '/icons/zap.svg',
 		},
 		{
-			content: 'Verwende dein Handy 2 Stunden weniger',
+			content: 'Benutze Ecosia als deine Suchmaschine, um Bäume zu pflanzen',
 			icon: '/icons/zap.svg',
 		},
 	]);
