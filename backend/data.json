@@ -1,8 +1,8 @@
 {
 	"standard_daten": {
 		"haus": {
-			"value": 1000,
-			"einheit": "kWh"
+			"value": 611,
+			"einheit": "kg"
 		},
 		"flug": {
 			"value": 0.5,
