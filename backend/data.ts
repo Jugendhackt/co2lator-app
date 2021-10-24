@@ -20,7 +20,6 @@ import standard_data from './data.json';
 class CO2Data {
 	fortbewegung: CO2DataPoint_Fortbewegung;
 	fleisch: CO2DataPoint_Meat;
-	//points: CO2DataPoint[];
 
 	constructor(json: object) {
 		// @ts-ignore
@@ -183,7 +182,6 @@ class CO2DataPoint_Meat extends CO2DataPoint {
 enum CO2DataPointType {
 	car = 'Automolitität',
 	phone = 'Handy',
-	//heating,
 	house = 'Wohnen',
 	meat = 'Lebensmmittel',
 
