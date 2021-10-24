@@ -4,10 +4,11 @@ const Footer: FunctionComponent = () => {
 	const [footerText, setFooterText] = useState('Made by CO2lator');
 	const [footerTextClicks, setFooterTextClicks] = useState(0);
 
+	// secret easter egg ;)
 	function clickedFooterText() {
 		setFooterTextClicks(footerTextClicks + 1);
 		if (footerTextClicks == 10) {
-			setFooterText('Lory was here c:');
+			setFooterText('Lory was here <3');
 		}
 	}
 	return (

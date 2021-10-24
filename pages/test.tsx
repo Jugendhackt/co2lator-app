@@ -157,9 +157,7 @@ const TestPage: NextPage = () => {
 									<input
 										className="border border-gray-400 rounded-xl px-4"
 										value={input}
-										placeholder={
-											questionStorage.questions[selectedQuestion].question
-										}
+										placeholder="Antwort"
 										onChange={(e) => {
 											setInput(e.target.value);
 										}}
@@ -215,13 +213,16 @@ const TestPage: NextPage = () => {
 									<div></div>
 								)}
 							</div>
-							{error !== '' ? (
-								<div>
-									<p className="text-red-500 mt-4">{error}</p>
-								</div>
-							) : (
-								<div></div>
-							)}
+							{
+								// show error if needed
+								error !== '' ? (
+									<div>
+										<p className="text-red-500 mt-4">{error}</p>
+									</div>
+								) : (
+									<div></div>
+								)
+							}
 						</div>
 						<div className="h-10 flex m-5 mb-10 justify-center">
 							{selectedQuestion > 0 ? (
@@ -263,4 +264,3 @@ const TestPage: NextPage = () => {
 };
 
 export default TestPage;
-//export { Question_AnswerType };

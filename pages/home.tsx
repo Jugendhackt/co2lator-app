@@ -14,7 +14,7 @@ const Home: NextPage = () => {
 	// React router for navigation
 	const router = useRouter();
 
-	// Statr variables
+	// State variables
 	const [username, setUsername] = useState('');
 	const [treesSaved, setTreesSaved] = useState(2);
 	const [savedData, setSavedData] = useState(
@@ -141,22 +141,3 @@ interface Tip {
 }
 
 export default Home;
-/**
- * 
- * {savedData.entries.length > 1 ? (
-							<div>
-								{
-									// @ts-ignore
-									savedData[
-										savedData.entries.length - 1
-									].value.emissionen_berechnen() -
-										// @ts-ignore
-										savedData[
-											savedData.entries.length - 2
-										].value.emissionen_berechnen()
-								}
-							</div>
-						) : (
-							<div></div>
-						)}
- */
