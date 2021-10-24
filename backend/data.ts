@@ -19,6 +19,7 @@ import standard_data from './data.json';
 
 class CO2Data {
 	fortbewegung: CO2DataPoint_Fortbewegung;
+	fleisch: CO2DataPoint_Meat;
 	//points: CO2DataPoint[];
 
 	constructor(json: object) {
@@ -29,19 +30,22 @@ class CO2Data {
 				? // @ts-ignore
 				  new CO2DataPoint_Fortbewegung(json['fortbewegung'])
 				: new CO2DataPoint_Fortbewegung({});
+
+		this.fleisch =
+			// @ts-ignore
+			typeof json['fleisch'] === 'object'
+				? // @ts-ignore
+				  new CO2DataPoint_Meat(json['fleisch'])
+				: new CO2DataPoint_Meat({});
 		//this.points = [];
 	}
 
 	emissionen_berechnen(): number {
 		const emissionen_fortbewegung = this.fortbewegung.emissionen_berechnen();
-		const summe = emissionen_fortbewegung;
+		const emissionen_fleisch = this.fleisch.emissionen_berechnen();
+		const summe = emissionen_fortbewegung + emissionen_fleisch;
 		return summe;
 	}
-
-	// Datenpunkt hinzufügen
-	/*addPoint(point: CO2DataPoint) {
-		this.points.push(point);
-	}*/
 }
 
 class CO2DataPoint {
@@ -154,12 +158,34 @@ class CO2DataPoint_Fortbewegung extends CO2DataPoint {
 	};
 }
 
+class CO2DataPoint_Meat extends CO2DataPoint {
+	fleisch_pro_woche: number;
+	essen_regional: boolean;
+
+	constructor(json: any) {
+		super(CO2DataPointType.meat);
+		this.fleisch_pro_woche = json['fleisch_pro_woche'] ?? 0;
+		this.essen_regional = json['essen_regional'] ?? true;
+	}
+
+	emissionen_berechnen = () => {
+		/* 
+		21kg CO2 pro kg Fleisch
+		=> 250g Fleisch = 5.25kg CO2
+		*/
+		const emissionen_fleisch =
+			5.25 * this.fleisch_pro_woche * (!this.essen_regional ? 1.5 : 1);
+		this.emissionen = emissionen_fleisch;
+		return this.emissionen;
+	};
+}
+
 enum CO2DataPointType {
 	car = 'Automolitität',
 	phone = 'Handy',
 	//heating,
 	house = 'Wohnen',
-	meat = 'Fleisch',
+	meat = 'Lebensmmittel',
 
 	fortbewegung = 'Fortbewegung',
 }

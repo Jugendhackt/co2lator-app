@@ -6,12 +6,15 @@ const IndexPage: NextPage = () => {
 	const router = useRouter();
 
 	useEffect(() => {
+		// get username + stored data
 		const storedUsername = localStorage.getItem('username');
 		const storedData = localStorage.getItem('co2data');
 
+		// check if both values exist
 		if (storedUsername !== null && storedData !== null) {
 			router.push('/home');
 		} else {
+			// if not, redirect to onboarding
 			router.push('/onboarding');
 		}
 	});

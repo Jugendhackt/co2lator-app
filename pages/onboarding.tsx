@@ -1,24 +1,30 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/dist/client/router';
 import { useEffect, useState } from 'react';
+import Footer from '../components/footer';
 
 const OnboardingPage: NextPage = () => {
 	const router = useRouter();
 	const [username, setUsername] = useState('');
 	const [error, setError] = useState('');
 
+	// submit username
 	function submit() {
+		// validate that username is not empty
 		if (username.length < 1) {
 			setError('Username is required');
 		} else {
+			// store usernae and start test
 			localStorage.setItem('username', username);
 			router.push('/test');
 		}
 	}
 
 	useEffect(() => {
+		// get username from local storage
 		const storedUsername = localStorage.getItem('username');
 		if (storedUsername !== null) {
+			// set username if it exists
 			setUsername(storedUsername);
 		}
 	}, []);
@@ -55,6 +61,9 @@ const OnboardingPage: NextPage = () => {
 				) : (
 					<div></div>
 				)}
+			</div>
+			<div className="h-16">
+				<Footer />
 			</div>
 		</div>
 	);

@@ -1,7 +1,241 @@
 import { Dispatch, SetStateAction } from 'react';
-import { Question_AnswerType } from '../pages/test';
-import { CO2Data } from './data';
+import { CO2Data, CO2DataPointType } from './data';
 
+class QuestionStorage {
+	setStoredData: Dispatch<SetStateAction<CO2Data>>;
+	setError: Dispatch<SetStateAction<string>>;
+
+	questions: Question[] = [
+		{
+			index: 0,
+			question: 'Fährst du ein E-Auto?',
+			answertype: Question_AnswerType.boolean,
+			type: CO2DataPointType.fortbewegung,
+			calculate: async (value: boolean) => {
+				return new Promise<number>((resolve, reject) => {
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.boolean,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fortbewegung.auto_istEAuto = value;
+							return e;
+						});
+						resolve(1);
+					});
+				});
+			},
+		},
+		{
+			index: 1,
+			question: 'Wie viele Kilometer fährst du in der Woche mit dem Auto?',
+			answertype: Question_AnswerType.text,
+			type: CO2DataPointType.fortbewegung,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.text,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fortbewegung.auto_KmProWoche = parseInt(value);
+							return e;
+						});
+						resolve(2);
+					});
+				});
+			},
+		},
+		{
+			index: 2,
+			question: 'Wie viele Stunden fliegst du mit dem Flugzeug im Jahr?',
+			answertype: Question_AnswerType.text,
+			type: CO2DataPointType.fortbewegung,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.text,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fortbewegung.flug_stdProJahr = parseInt(value);
+							return e;
+						});
+						resolve(3);
+					});
+				});
+			},
+		},
+		{
+			index: 3,
+			question:
+				'Wie viele Kilometer fährst du mit öffentlichen Verkehrsmitteln in der Woche?',
+			answertype: Question_AnswerType.text,
+			type: CO2DataPointType.fortbewegung,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.text,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fortbewegung.opnv_kmProWoche = parseInt(value);
+							return e;
+						});
+						resolve(4);
+					});
+				});
+			},
+		},
+
+		{
+			index: 4,
+
+			question: 'Bist du Veganer, Vegetarier oder Omnivor',
+
+			answertype: Question_AnswerType.select,
+
+			type: CO2DataPointType.meat,
+			answers: [
+				{
+					text: 'Veganer',
+					value: 0,
+					jumpto: 6,
+				},
+				{
+					text: 'Vegetarier',
+					value: 1,
+					jumpto: 6,
+				},
+				{
+					text: 'Omnivor',
+					value: 2,
+					jumpto: 5,
+				},
+			],
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					checkInput_Number(value)
+						.then(() => {
+							var jumpto: number = value == '0' ? 6 : value == '1' ? 6 : 5;
+							return resolve(jumpto);
+						})
+						.catch((err) => {
+							return reject(err);
+						});
+				});
+			},
+		},
+
+		{
+			index: 5,
+
+			question: 'Wie oft in der Woche isst du Fleisch?',
+
+			answertype: Question_AnswerType.text,
+
+			type: CO2DataPointType.meat,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.text,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fleisch.fleisch_pro_woche = parseInt(value);
+							return e;
+						});
+						resolve(4);
+					});
+
+					checkInput_Number(value)
+						.then(() => {
+							return resolve(6);
+						})
+						.catch((err) => {
+							return reject(err);
+						});
+				});
+			},
+		},
+
+		{
+			index: 6,
+
+			question: 'Isst du eher regionale Lebensmittel oder exotische?',
+
+			answertype: Question_AnswerType.select,
+			answers: [
+				{
+					text: 'Regional',
+					value: 1,
+					jumpto: 7,
+				},
+				{
+					text: 'Exotisch',
+					value: 0,
+					jumpto: 7,
+				},
+			],
+
+			type: CO2DataPointType.meat,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					console.log(value);
+					addAnswerToStorage(
+						value,
+						Question_AnswerType.select,
+						this.setError
+					).then(() => {
+						this.setStoredData((e) => {
+							e.fleisch.essen_regional = parseInt(value) == 1 ? true : false;
+							return e;
+						});
+						resolve(7);
+					});
+				});
+			},
+		},
+		/*{
+			index: 7,
+
+			question: 'Wie oft in der Woche kochst du selbst?',
+
+			answertype: Question_AnswerType.text,
+
+			type: CO2DataPointType.meat,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {});
+			},
+		},
+
+		{
+			index: 10,
+
+			question: 'Benutzt du mehrfachverwendbare Behälter / Taschen?',
+
+			answertype: Question_AnswerType.boolean,
+
+			type: CO2DataPointType.meat,
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {});
+			},
+		},*/
+	];
+
+	constructor(
+		setStoredData: Dispatch<SetStateAction<CO2Data>>,
+		setError: Dispatch<SetStateAction<string>>
+	) {
+		this.setStoredData = setStoredData;
+		this.setError = setError;
+	}
+}
 // function to add the answer to the `storedData` object
 function addAnswerToStorage(
 	value: any,
@@ -46,6 +280,28 @@ const checkInput_Number = (value: string) => {
 	});
 };
 
+interface Question {
+	index: number;
+	question: string;
+	answertype: Question_AnswerType;
+	answers?: Answer[];
+	type: CO2DataPointType;
+	calculate: (value: any) => Promise<number>;
+}
+
+enum Question_AnswerType {
+	multiplechoice,
+	text,
+	select,
+	boolean,
+}
+
+interface Answer {
+	text: string;
+	value: number;
+	jumpto: number;
+}
+
 export default addAnswerToStorage;
 
-export { checkInput_Number };
+export { checkInput_Number, QuestionStorage, Question_AnswerType };

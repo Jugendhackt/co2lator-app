@@ -6,7 +6,10 @@ import {
 	CO2DataPointType,
 	CO2DataPoint_Fortbewegung,
 } from '../backend/data';
-import addAnswerToStorage from '../backend/questions';
+import addAnswerToStorage, {
+	QuestionStorage,
+	Question_AnswerType,
+} from '../backend/questions';
 import Header from '../components/header';
 import { GlobalStorageManager } from './_app';
 
@@ -31,102 +34,10 @@ const TestPage: NextPage = () => {
 
 	const router = useRouter();
 
-	// Liste mit allen Fragen
-	const questions: Question[] = [
-		{
-			index: 0,
-			question: 'Fährst du ein E-Auto?',
-			answertype: Question_AnswerType.boolean,
-			type: CO2DataPointType.fortbewegung,
-			calculate: async (value: boolean) => {
-				addAnswerToStorage(value, Question_AnswerType.boolean, setError).then(
-					() => {
-						setStoredData((e) => {
-							e.fortbewegung.auto_istEAuto = value;
-							return e;
-						});
-					}
-				);
-			},
-			/*calculate: async (value: boolean) => {
-				return new Promise<void>((resolve, reject) => {
-					setStoredData((e) => {
-						e.fortbewegung.auto_istEAuto = value;
-						return e;
-					});
-					return resolve();
-				});
-				/*console.log(storedData.points.map((e) => e.type));
-				const point = storedData.points.find(
-					(e) => e.type === CO2DataPointType.fortbewegung
-				) as CO2DataPoint_Fortbewegung;
-				point.auto_istEAuto = value;
-			},*/
-		},
-		{
-			index: 1,
-			question: 'Wie viele Kilometer fährst du in der Woche mit dem Auto?',
-			answertype: Question_AnswerType.text,
-			type: CO2DataPointType.fortbewegung,
-			calculate: async (value: string) => {
-				return new Promise<void>((resolve, reject) => {
-					if (!isNaN(parseInt(value)) && parseInt(value) >= 0) {
-						setStoredData((e) => {
-							e.fortbewegung.auto_KmProWoche = parseInt(value);
-							return e;
-						});
-						return resolve();
-					} else {
-						reject('Der eingegebene Text ist keine Zahl');
-					}
-				});
-				/*console.log(storedData.points.map((e) => e.type));
-				const point = storedData.points.find(
-					(e) => e.type === CO2DataPointType.fortbewegung
-				) as CO2DataPoint_Fortbewegung;
-				point.auto_KmProWoche = value;*/
-			},
-		},
-		{
-			index: 2,
-			question: 'Wie viele Stunden fliegst du mit dem Flugzeug im Jahr?',
-			answertype: Question_AnswerType.text,
-			type: CO2DataPointType.fortbewegung,
-			calculate: async (value: string) => {
-				return new Promise<void>((resolve, reject) => {
-					if (!isNaN(parseInt(value)) && parseInt(value) >= 0) {
-						setStoredData((e) => {
-							e.fortbewegung.flug_stdProJahr = parseInt(value);
-							return e;
-						});
-						return resolve();
-					} else {
-						reject('Der eingegebene Text ist keine Zahl');
-					}
-				});
-			},
-		},
-		{
-			index: 3,
-			question:
-				'Wie viele Kilometer fährst du mit öffentlichen Verkehrsmitteln in der Woche?',
-			answertype: Question_AnswerType.text,
-			type: CO2DataPointType.fortbewegung,
-			calculate: async (value: string) => {
-				return new Promise<void>((resolve, reject) => {
-					if (!isNaN(parseInt(value)) && parseInt(value) >= 0) {
-						setStoredData((e) => {
-							e.fortbewegung.opnv_kmProWoche = parseInt(value);
-							return e;
-						});
-						return resolve();
-					} else {
-						reject('Der eingegebene Text ist keine Zahl');
-					}
-				});
-			},
-		},
-	];
+	var questionStorage: QuestionStorage = new QuestionStorage(
+		setStoredData,
+		setError
+	);
 
 	useEffect(() => {
 		if (localStorage.getItem('username') === null) {
@@ -139,18 +50,18 @@ const TestPage: NextPage = () => {
 	}, []);
 	async function continueButtonPressed(skipped: boolean, _input: any | null) {
 		if (!skipped) {
-			const question = questions[selectedQuestion];
+			const question = questionStorage.questions[selectedQuestion];
 			question
 				.calculate(_input != null ? _input : input)
 				.then((_res) => {
-					gotoNextQuestion();
+					gotoNextQuestion(_res);
 				})
 				.catch((err) => {
 					setError(err);
 				});
 			// Datenpunkt hinzufügen
 		} else {
-			gotoNextQuestion();
+			gotoNextQuestion(selectedQuestion + 1);
 		}
 	}
 
@@ -158,17 +69,17 @@ const TestPage: NextPage = () => {
 		setemissionenSumme(storedData.emissionen_berechnen());
 	}
 
-	function gotoNextQuestion() {
+	function gotoNextQuestion(nextindex: number) {
 		setInput('');
 		setError('');
 		calculate_emissionen();
 		// Überprüfen, ob eine weitere Frage existiert
-		if (selectedQuestion + 1 === questions.length) {
+		if (selectedQuestion + 1 === questionStorage.questions.length) {
 			// Beenden
 			GlobalStorageManager.store(storedData);
 			setQuizEnded(true);
 		} else {
-			setSelectedQuestion(selectedQuestion + 1);
+			setSelectedQuestion(nextindex);
 		}
 	}
 
@@ -211,14 +122,19 @@ const TestPage: NextPage = () => {
 								<div className="w-full h-full bg-gray-300 rounded absolute" />
 								<div
 									style={{
-										width: `${(selectedQuestion / questions.length) * 100}%`,
+										width: `${
+											(selectedQuestion / questionStorage.questions.length) *
+											100
+										}%`,
 									}}
 									className={`bg-gradient-to-r from-red-400 ${
-										selectedQuestion / questions.length > 0.75
+										selectedQuestion / questionStorage.questions.length > 0.75
 											? 'via-yellow-300 to-green-400'
-											: selectedQuestion / questions.length > 0.5
+											: selectedQuestion / questionStorage.questions.length >
+											  0.5
 											? 'to-yellow-300'
-											: selectedQuestion / questions.length > 0.25
+											: selectedQuestion / questionStorage.questions.length >
+											  0.25
 											? 'to-yellow-600'
 											: 'to-yellow-700'
 									} h-2 rounded absolute`}
@@ -226,21 +142,24 @@ const TestPage: NextPage = () => {
 							</div>
 							<p>Emissionen: {emissionenSumme.toFixed(0)}kg/Jahr</p>
 							<p className="italic content-center">
-								Frage {selectedQuestion + 1} von {questions.length}:{' '}
-								{questions[selectedQuestion].type}
+								Frage {selectedQuestion + 1} von{' '}
+								{questionStorage.questions.length}:{' '}
+								{questionStorage.questions[selectedQuestion].type}
 							</p>
 							<h1 className="text-xl font-bold">
-								{questions[selectedQuestion].question}
+								{questionStorage.questions[selectedQuestion].question}
 							</h1>
 						</div>
 						<div className="">
 							<div>
-								{questions[selectedQuestion].answertype ===
+								{questionStorage.questions[selectedQuestion].answertype ===
 								Question_AnswerType.text ? (
 									<input
 										className="border border-gray-400 rounded-xl px-4"
 										value={input}
-										placeholder={questions[selectedQuestion].question}
+										placeholder={
+											questionStorage.questions[selectedQuestion].question
+										}
 										onChange={(e) => {
 											setInput(e.target.value);
 										}}
@@ -248,7 +167,7 @@ const TestPage: NextPage = () => {
 								) : (
 									<div></div>
 								)}
-								{questions[selectedQuestion].answertype ===
+								{questionStorage.questions[selectedQuestion].answertype ===
 								Question_AnswerType.boolean ? (
 									<div className="flex justify-center">
 										<button
@@ -267,6 +186,30 @@ const TestPage: NextPage = () => {
 										>
 											Nein
 										</button>
+									</div>
+								) : (
+									<div></div>
+								)}
+								{questionStorage.questions[selectedQuestion].answertype ===
+								Question_AnswerType.select ? (
+									<div className="flex flex-col justify-center">
+										{questionStorage.questions[selectedQuestion].answers!.map(
+											(answer) => (
+												<div>
+													<button
+														className="px-8 bg-blue-500 rounded-lg mb-2 text-white text-lg p-2"
+														onClick={() => {
+															continueButtonPressed(
+																false,
+																answer.value.toString()
+															);
+														}}
+													>
+														{answer.text}
+													</button>
+												</div>
+											)
+										)}
 									</div>
 								) : (
 									<div></div>
@@ -297,13 +240,14 @@ const TestPage: NextPage = () => {
 							>
 								Überspringen
 							</button>
-							{questions[selectedQuestion].answertype !==
-							Question_AnswerType.boolean ? (
+							{questionStorage.questions[selectedQuestion].answertype ===
+								Question_AnswerType.text ||
+							Question_AnswerType.multiplechoice ? (
 								<button
 									className="px-4 bg-blue-500 rounded-xl mr-2 text-white"
 									onClick={() => continueButtonPressed(false, null)}
 								>
-									{selectedQuestion + 1 === questions.length
+									{selectedQuestion + 1 === questionStorage.questions.length
 										? 'Beenden'
 										: 'Weiter'}
 								</button>
@@ -318,26 +262,5 @@ const TestPage: NextPage = () => {
 	);
 };
 
-interface Question {
-	index: number;
-	question: string;
-	answertype: Question_AnswerType;
-	answers?: Answer[];
-	type: CO2DataPointType;
-	calculate: (value: any) => Promise<void>;
-}
-
-enum Question_AnswerType {
-	multiplechoice,
-	text,
-	select,
-	boolean,
-}
-
-interface Answer {
-	text: string;
-	jumpto: number;
-}
-
 export default TestPage;
-export { Question_AnswerType };
+//export { Question_AnswerType };
