@@ -8,6 +8,36 @@ class QuestionStorage {
 	questions: Question[] = [
 		{
 			index: 0,
+			question: 'Hast du ein Auto?',
+			answertype: Question_AnswerType.select,
+			type: CO2DataPointType.fortbewegung,
+			answers: [
+				{
+					text: 'Ja',
+					value: 1,
+					jumpto: 1,
+				},
+				{
+					text: 'Nein',
+					value: 0,
+					jumpto: 3,
+				},
+			],
+			calculate: async (value: string) => {
+				return new Promise<number>((resolve, reject) => {
+					checkInput_Number(value)
+						.then(() => {
+							var jumpto: number = value == '1' ? 1 : 3;
+							return resolve(jumpto);
+						})
+						.catch((err) => {
+							return reject(err);
+						});
+				});
+			},
+		},
+		{
+			index: 1,
 			question: 'Fährst du ein E-Auto?',
 			answertype: Question_AnswerType.boolean,
 			type: CO2DataPointType.fortbewegung,
@@ -22,13 +52,13 @@ class QuestionStorage {
 							e.fortbewegung.auto_istEAuto = value;
 							return e;
 						});
-						resolve(1);
+						resolve(2);
 					});
 				});
 			},
 		},
 		{
-			index: 1,
+			index: 2,
 			question: 'Wie viele Kilometer fährst du in der Woche mit dem Auto?',
 			answertype: Question_AnswerType.text,
 			type: CO2DataPointType.fortbewegung,
@@ -43,13 +73,13 @@ class QuestionStorage {
 							e.fortbewegung.auto_KmProWoche = parseInt(value);
 							return e;
 						});
-						resolve(2);
+						resolve(3);
 					});
 				});
 			},
 		},
 		{
-			index: 2,
+			index: 3,
 			question: 'Wie viele Stunden fliegst du mit dem Flugzeug im Jahr?',
 			answertype: Question_AnswerType.text,
 			type: CO2DataPointType.fortbewegung,
@@ -64,13 +94,13 @@ class QuestionStorage {
 							e.fortbewegung.flug_stdProJahr = parseInt(value);
 							return e;
 						});
-						resolve(3);
+						resolve(4);
 					});
 				});
 			},
 		},
 		{
-			index: 3,
+			index: 4,
 			question:
 				'Wie viele Kilometer fährst du mit öffentlichen Verkehrsmitteln in der Woche?',
 			answertype: Question_AnswerType.text,
@@ -86,14 +116,14 @@ class QuestionStorage {
 							e.fortbewegung.opnv_kmProWoche = parseInt(value);
 							return e;
 						});
-						resolve(4);
+						resolve(5);
 					});
 				});
 			},
 		},
 
 		{
-			index: 4,
+			index: 5,
 
 			question: 'Bist du Veganer, Vegetarier oder Omnivor',
 
@@ -104,24 +134,24 @@ class QuestionStorage {
 				{
 					text: 'Veganer',
 					value: 0,
-					jumpto: 6,
+					jumpto: 7,
 				},
 				{
 					text: 'Vegetarier',
 					value: 1,
-					jumpto: 6,
+					jumpto: 7,
 				},
 				{
 					text: 'Omnivor',
 					value: 2,
-					jumpto: 5,
+					jumpto: 6,
 				},
 			],
 			calculate: async (value: string) => {
 				return new Promise<number>((resolve, reject) => {
 					checkInput_Number(value)
 						.then(() => {
-							var jumpto: number = value == '0' ? 6 : value == '1' ? 6 : 5;
+							var jumpto: number = value == '0' ? 7 : value == '1' ? 7 : 6;
 							return resolve(jumpto);
 						})
 						.catch((err) => {
@@ -132,7 +162,7 @@ class QuestionStorage {
 		},
 
 		{
-			index: 5,
+			index: 6,
 
 			question: 'Wie oft in der Woche isst du Fleisch?',
 
@@ -150,22 +180,22 @@ class QuestionStorage {
 							e.fleisch.fleisch_pro_woche = parseInt(value);
 							return e;
 						});
-						resolve(4);
+						resolve(7);
 					});
 
-					checkInput_Number(value)
+					/*checkInput_Number(value)
 						.then(() => {
 							return resolve(6);
 						})
 						.catch((err) => {
 							return reject(err);
-						});
+						});*/
 				});
 			},
 		},
 
 		{
-			index: 6,
+			index: 7,
 
 			question: 'Isst du eher regionale Lebensmittel oder exotische?',
 
@@ -174,12 +204,12 @@ class QuestionStorage {
 				{
 					text: 'Regional',
 					value: 1,
-					jumpto: 7,
+					jumpto: 8,
 				},
 				{
 					text: 'Exotisch',
 					value: 0,
-					jumpto: 7,
+					jumpto: 8,
 				},
 			],
 
@@ -196,36 +226,11 @@ class QuestionStorage {
 							e.fleisch.essen_regional = parseInt(value) == 1 ? true : false;
 							return e;
 						});
-						resolve(7);
+						resolve(8);
 					});
 				});
 			},
 		},
-		/*{
-			index: 7,
-
-			question: 'Wie oft in der Woche kochst du selbst?',
-
-			answertype: Question_AnswerType.text,
-
-			type: CO2DataPointType.meat,
-			calculate: async (value: string) => {
-				return new Promise<number>((resolve, reject) => {});
-			},
-		},
-
-		{
-			index: 10,
-
-			question: 'Benutzt du mehrfachverwendbare Behälter / Taschen?',
-
-			answertype: Question_AnswerType.boolean,
-
-			type: CO2DataPointType.meat,
-			calculate: async (value: string) => {
-				return new Promise<number>((resolve, reject) => {});
-			},
-		},*/
 	];
 
 	constructor(
